@@ -89,18 +89,25 @@ function render(){
 $("prevBtn").onclick=()=>{if(current>0){current--;render()}};
 $("nextBtn").onclick=()=>{if(!reviewed){reviewed=true;render();return}if(current<questions.length-1){current++;reviewed=false;render()}else showResults()};
 function showResults(){const score=answers.reduce((n,a,i)=>n+(a===questions[i].correct?1:0),0);$("quiz").classList.add("hidden");$("results").classList.remove("hidden");let title=score>=10?"Incroyable, tu maîtrises le sujet !":score>=7?"Bien joué, les bases sont là.":"Chaque bonne info compte.";let msg=score>=10?"Tu as de solides repères. Continue à en parler autour de toi.":score>=7?"Tu as déjà de bons réflexes. Relis les explications pour consolider tes connaissances.":"Le but était d’apprendre, pas d’avoir 12/12. Parcours les corrections et repars avec quelques réflexes utiles.";
-// Send only participant identity and final score to Netlify Forms. Individual answers are not transmitted.
-const resultForm = document.querySelector('form[name="movember-results"]');
-const resultData = new URLSearchParams();
-resultData.set('form-name','movember-results');
-resultData.set('participant',$('fullname').value.trim());
-resultData.set('email',$('email').value.trim());
-resultData.set('score',`${score}/12`);
-resultData.set('percentage',`${Math.round(score/12*100)} %`);
-resultData.set('resultat',title);
-resultData.set('date',new Date().toLocaleString('fr-FR'));
-fetch('/',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:resultData.toString()}).then(r=>{if(!r.ok) console.warn('Envoi du résultat non confirmé par l’hébergement.');}).catch(err=>console.warn('Résultat non envoyé :',err));
-$("results").innerHTML=`<div class="result"><div class="step">Ton résultat</div><div class="scorecircle"><div><b>${score}/12</b><span>${Math.round(score/12*100)} % de réussite</span></div></div><h2>${title}</h2><p>${msg}</p><div class="startrow" style="justify-content:center"><button class="btn btn-primary" id="again">Recommencer ↻</button><button class="btn btn-secondary" id="print">Imprimer mon résultat</button></div></div><div class="review"><h3>Les réponses à retenir</h3>${questions.map((q,i)=>`<div class="reviewitem"><strong>${i+1}. ${q.q}</strong><span>${answers[i]===q.correct?"✓ Bonne réponse. ":"Réponse correcte : "+q.a[q.correct]+". "}${q.why}</span></div>`).join("")}</div><p class="footer">Participant : ${escapeHtml($("fullname").value)} · ${escapeHtml($("email").value)}<br>Le résultat est calculé dans ton navigateur et n’est pas transmis automatiquement.</p>`;
+const APPS_SCRIPT_URL = https://script.google.com/macros/s/AKfycbzmar60-HiskLvgOLdL0r1gVPr8TfP9HegEz89vxK9eqN1u5PH7qo6HDiPyyNlJiHvz/exec;
+const resultData = {
+  name: $("fullname").value.trim(),
+  participantEmail: $("email").value.trim(),
+  score: score,
+  total: 12,
+  percentage: Math.round(score / 12 * 100),
+  submittedAt: new Date().toISOString()
+};
+if (APPS_SCRIPT_URL.startsWith("https://script.google.com/macros/s/")) {
+  fetch(APPS_SCRIPT_URL, {
+    method: "POST",
+    mode: "no-cors",
+    headers: {
+      "Content-Type": "text/plain;charset=utf-8"
+    },
+    body: JSON.stringify(resultData)
+  }).catch(err => console.error("Erreur d'envoi :", err));
+}`<div class="result"><div class="step">Ton résultat</div><div class="scorecircle"><div><b>${score}/12</b><span>${Math.round(score/12*100)} % de réussite</span></div></div><h2>${title}</h2><p>${msg}</p><div class="startrow" style="justify-content:center"><button class="btn btn-primary" id="again">Recommencer ↻</button><button class="btn btn-secondary" id="print">Imprimer mon résultat</button></div></div><div class="review"><h3>Les réponses à retenir</h3>${questions.map((q,i)=>`<div class="reviewitem"><strong>${i+1}. ${q.q}</strong><span>${answers[i]===q.correct?"✓ Bonne réponse. ":"Réponse correcte : "+q.a[q.correct]+". "}${q.why}</span></div>`).join("")}</div><p class="footer">Participant : ${escapeHtml($("fullname").value)} · ${escapeHtml($("email").value)}<br>Le résultat est calculé dans ton navigateur et n’est pas transmis automatiquement.</p>`;
 $("again").onclick=()=>{current=0;answers=Array(questions.length).fill(null);reviewed=false;$("results").classList.add("hidden");$("identity").classList.remove("hidden");$("fullname").value="";$("email").value="";$("identity").scrollIntoView({behavior:"smooth"})};$("print").onclick=()=>window.print();$("results").scrollIntoView({behavior:"smooth",block:"start"})}
 function escapeHtml(s){return s.replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 </script>
