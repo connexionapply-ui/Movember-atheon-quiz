@@ -89,7 +89,7 @@ function render(){
 $("prevBtn").onclick=()=>{if(current>0){current--;render()}};
 $("nextBtn").onclick=()=>{if(!reviewed){reviewed=true;render();return}if(current<questions.length-1){current++;reviewed=false;render()}else showResults()};
 function showResults(){const score=answers.reduce((n,a,i)=>n+(a===questions[i].correct?1:0),0);$("quiz").classList.add("hidden");$("results").classList.remove("hidden");let title=score>=10?"Incroyable, tu maîtrises le sujet !":score>=7?"Bien joué, les bases sont là.":"Chaque bonne info compte.";let msg=score>=10?"Tu as de solides repères. Continue à en parler autour de toi.":score>=7?"Tu as déjà de bons réflexes. Relis les explications pour consolider tes connaissances.":"Le but était d’apprendre, pas d’avoir 12/12. Parcours les corrections et repars avec quelques réflexes utiles.";
-const APPS_SCRIPT_URL = https://script.google.com/macros/s/AKfycbzmar60-HiskLvgOLdL0r1gVPr8TfP9HegEz89vxK9eqN1u5PH7qo6HDiPyyNlJiHvz/exec;
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzk4D-R1HI3aGlb8Iyc9C3ZyerzFlQeGEwvuAmxFaaRk6ZRz22t5EIuFYNd9kti3wTybg/exec";
 const resultData = {
   name: $("fullname").value.trim(),
   participantEmail: $("email").value.trim(),
